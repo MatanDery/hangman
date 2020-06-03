@@ -11,21 +11,37 @@ def init_wordlist(word_len):
                 match_wordlist.append(word.rstrip())
         return match_wordlist
 
-def calc_most_likely_letter(wordlist, solved_letters):
-    wordlist = ''.join(wordlist)
-    counts = Counter(wordlist)
-    return counts.most_common()[len(solved_letters)][0]
+# def calc_most_likely_letter(wordlist, solved_letters):   simple calc
+#     wordlist = ''.join(wordlist)
+#     counts = Counter(wordlist)
+#     return counts.most_common()[len(solved_letters)][0]
+
+def calc_most_likely_letter(wordlist, blank_word, solved_letters):
+    tmp_wordlist=''
+    for i in range(len(blank_word)):
+        if blank_word[i] == '_ ':
+            for word in wordlist:
+                tmp_wordlist += word[i]
+    counts = Counter(tmp_wordlist)
+    for i in range(len(solved_letters)+1):
+        if counts.most_common()[i][0] not in solved_letters:
+            return counts.most_common()[i][0]
+
 
 def correct_letter_position(letter, blank_word):
-    ocs = input(f'How Many Times "{letter}" Appears?')
+    ocs = input(f'How Many Times "{letter}" Appears?    ')
     try:
         ocs = int(ocs)
     except ValueError:
         print('Enter a number Please')
         correct_letter_position(letter, blank_word)
+    if ocs > blank_word.count("_ "):
+        print('Impossible try again')
+        correct_letter_position(letter, blank_word)
+
     print(''.join(blank_word))
     for i in range(ocs):
-        index  = input(f"Enter index of letter 1 - {len(blank_word)}")
+        index = input(f"Enter index of letter 1 - {len(blank_word)}    ")
         try:
             index = int(index)
         except ValueError:
@@ -40,9 +56,6 @@ def correct_letter_position(letter, blank_word):
     return blank_word
 
 
-
-
-
 def filter_not_letter(wordlist, letter):
     n_wordlist =[]
     for word in wordlist:
@@ -50,11 +63,13 @@ def filter_not_letter(wordlist, letter):
             n_wordlist.append(word)
     return n_wordlist
 
-def filter_yes_letter(wordlist, letter):
+def filter_yes_letter(wordlist, blank_word, guess_letter):
     n_wordlist =[]
-    for word in wordlist:
-        if letter in word:
-            n_wordlist.append(word)
+    for i in range(len(blank_word)):
+        if blank_word[i] == guess_letter:
+            for word in wordlist:
+                if word[i] == guess_letter:
+                    n_wordlist.append(word)
     return n_wordlist
 
 
@@ -81,35 +96,22 @@ def game():
 
     solved_letters=[]
     while True:
-        if len(wordlist) == 1:
-            print(f"Your Word Is:  {wordlist[0]}")
+        if '_ ' not in  blank_word:
+            print(f"Your Word Is:  {''.join(blank_word)}")
+            game()
+
         if len(wordlist) == 0:
             print(f"Your Word Doesnt Exist!!!")
 
-        guess_letter = calc_most_likely_letter(wordlist, solved_letters)
+        guess_letter = calc_most_likely_letter(wordlist, blank_word,solved_letters)
         correct = guessing(guess_letter)
 
         if correct:
             blank_word = correct_letter_position(guess_letter, blank_word)
-            print(blank_word)
+            print(''.join(blank_word))
             solved_letters.append(guess_letter)
-            wordlist = filter_yes_letter(wordlist, guess_letter)
+            wordlist = filter_yes_letter(wordlist, blank_word , guess_letter)
         else:
             wordlist = filter_not_letter(wordlist, guess_letter)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 game()
