@@ -28,29 +28,39 @@ def calc_most_likely_letter(wordlist, blank_word, solved_letters):
             return counts.most_common()[i][0]
 
 
-def correct_letter_position(letter, blank_word):
+def num_of_repeats(letter, blank_word):
     ocs = input(f'How Many Times "{letter}" Appears?    ')
     try:
         ocs = int(ocs)
     except ValueError:
         print('Enter a number Please')
-        correct_letter_position(letter, blank_word)
+        ocs = num_of_repeats(letter, blank_word)
     if ocs > blank_word.count("_ "):
         print('Impossible try again')
-        correct_letter_position(letter, blank_word)
+        ocs = num_of_repeats(letter, blank_word)
+    return ocs
 
+def index_of_correct_letter(blank_word):
+    index = input(f"Enter index of letter 1 - {len(blank_word)}    ")
+    try:
+        index = int(index)
+    except ValueError:
+        print('Enter a number Please')
+        index = index_of_correct_letter(blank_word)
+
+    if index < 1 or index > len(blank_word) or blank_word[index - 1] != '_ ':
+        print('Ileagal!! please enter a leagal index!!!')
+        print('retry')
+        index = index_of_correct_letter(blank_word)
+    return index
+
+
+def correct_letter_position(letter, blank_word):
+    ocs = num_of_repeats(letter, blank_word)
     print(''.join(blank_word))
     for i in range(ocs):
-        index = input(f"Enter index of letter 1 - {len(blank_word)}    ")
-        try:
-            index = int(index)
-        except ValueError:
-            print('Enter a number Please')
+        index = index_of_correct_letter(blank_word)
 
-        if index < 1 or index > len(blank_word) or blank_word[index-1] != '_ ':
-            print('Ileagal!! please enter a leagal index!!!')
-            print('retry')
-            correct_letter_position(letter, blank_word)
         blank_word[index-1] = letter
         print(''.join(blank_word))
     return blank_word
@@ -77,8 +87,8 @@ def guessing(guess_letter):
     correct = input(f"My letter is '{guess_letter}' is it correct? y/n        ")
     if correct !='y' and correct != 'n':
         print('only enter y or n!')
-        guessing(guess_letter)
-    return correct == 'y'
+        correct = guessing(guess_letter)
+    return (correct == 'y' or correct == True)
 
 def game():
     word_len = input("Enter length of word          ")
